@@ -33,9 +33,10 @@ export function createUI(screenEl) {
     screenEl.innerHTML = `
       <div class="status-bar"><span>歌曲</span><span class="count">${listIndex + 1}/${songs.length}</span></div>
       <ul class="song-list">
-        ${songs.map((s, i) => `<li class="${i === listIndex ? 'sel' : ''}">
+        ${songs.map((s, i) => `<li class="${i === listIndex ? 'sel' : ''}" data-index="${i}">
           <span class="t">${esc(s.title || '未知')}</span>
-          <span class="a">${esc(s.artist || '')}</span></li>`).join('')}
+          <span class="a">${esc(s.artist || '')}</span>
+          <button class="del-btn" data-del-id="${s.id}" aria-label="删除">×</button></li>`).join('')}
       </ul>`;
     const sel = screenEl.querySelector('.song-list li.sel');
     if (sel) sel.scrollIntoView({ block: 'nearest' });

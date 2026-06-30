@@ -72,6 +72,17 @@ html, body {
 .song-list li .t { font-size: 15px; }
 .song-list li .a { font-size: 12px; color: var(--text-dim); }
 .song-list li.sel .a { color: rgba(255,255,255,0.8); }
+.song-list li { position: relative; }
+.del-btn {
+  position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: rgba(224,71,107,0.15); color: var(--rose);
+  font-size: 16px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .18s, background .18s;
+}
+.song-list li.sel .del-btn { opacity: 1; }
+.del-btn:active { background: var(--rose); color: #fff; }
 /* 空态 */
 .empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--text-dim); }
 .empty-dot { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;

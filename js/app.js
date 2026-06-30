@@ -113,7 +113,32 @@ fileInput?.addEventListener('change', () => {
 // 空态里的"点这里导入"按钮(动态生成,事件委托)
 screenEl.addEventListener('click', (e) => {
   if (e.target.id === 'import-empty') fileInput.click();
+  // 删除歌曲
+  const delBtn = e.target.closest('.del-btn');
+  if (delBtn) {
+    const id = Number(delBtn.dataset.delId);
+    deleteSongById(id);
+  }
 });
+
+async function deleteSongById(id) {
+  if (!confirm('确定删除这首歌吗？')) return;
+  try {
+    await store.deleteSong(id);
+    songs = await store.getAllSongs();
+    // 如果正在播放的被删了，重置 now
+    if (state.screen === 'now' && (!songs.length || player.currentIndex() < 0)) {
+      state.screen = 'list';
+      now = { title: '', artist: '', playing: false, currentTime: 0, duration: 0, volume: 0.8, npMode: 'volume' };
+    }
+    // 修正 listIndex 防止越界
+    if (state.listIndex >= songs.length && songs.length > 0) state.listIndex = songs.length - 1;
+    else if (songs.length === 0) state.listIndex = 0;
+    rerender();
+  } catch (err) {
+    alert('删除失败:' + err.message);
+  }
+}
 
 // 安装提示:非 standalone 才显示
 const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
