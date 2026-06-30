@@ -32,11 +32,9 @@ function renderRGBA(size) {
       if (ringCov > 0) {
         r = blend(r, ROSE[0], ringCov); g = blend(g, ROSE[1], ringCov); b = blend(b, ROSE[2], ringCov);
       }
-      // 中心实心圆
-      const cenCov = Math.max(0, Math.min(1, 0.5 - (dist - centerR)));
-      if (cenCov > 0) {
-        r = blend(r, ROSE[0], cenCov); g = blend(g, ROSE[1], cenCov); b = blend(b, ROSE[2], cenCov);
-      }
+      // 中心实心圆（深色底，与 BG 一致，不额外着色）
+      // 仅保留边缘硬边：不 mix 任何颜色，保持背景色
+      // (intentionally left blank — center keeps BG color)
       const i = (y * size + x) * 4;
       buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = 255;
     }

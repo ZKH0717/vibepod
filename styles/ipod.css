@@ -107,12 +107,11 @@ html, body {
 #wheel {
   position: relative; width: 62vw; max-width: 270px; aspect-ratio: 1;
   margin-bottom: 5vh; border-radius: 50%;
-  background: radial-gradient(circle at 50% 35%, #17171c, #0c0c0f);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 0 1px rgba(224,71,107,0.18),
-              0 10px 30px rgba(0,0,0,0.6);
+  background: radial-gradient(circle at 50% 35%, #ff5a7e, #c92d52);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 30px rgba(0,0,0,0.6);
   touch-action: none;
 }
-.wheel-label { position: absolute; color: var(--text-dim); font-size: 13px; letter-spacing: 1px; pointer-events: none; }
+.wheel-label { position: absolute; color: rgba(255,255,255,0.9); font-size: 13px; letter-spacing: 1px; pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
 .label-menu { top: 12px; left: 50%; transform: translateX(-50%); }
 .label-play { bottom: 12px; left: 50%; transform: translateX(-50%); }
 .label-prev { left: 14px; top: 50%; transform: translateY(-50%); }
@@ -124,7 +123,7 @@ html, body {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.5);
   transition: box-shadow .15s;
 }
-#wheel:active #wheel-center { box-shadow: inset 0 0 0 1px var(--rose), 0 0 16px var(--rose-glow); }
+#wheel:active #wheel-center { box-shadow: inset 0 0 0 1px #fff, 0 0 20px rgba(255,255,255,0.4); }
 /* 导入按钮(隐藏入口) */
 #import-btn {
   position: absolute; top: calc(env(safe-area-inset-top) + 8px); right: 18px;
