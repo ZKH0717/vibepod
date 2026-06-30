@@ -1,0 +1,8 @@
+# 工具与本地状态目录，不应进入仓库
+.claude/
+.superpowers/
+
+# 依赖与系统文件
+node_modules/
+.DS_Store
+Thumbs.db
