@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="iPod">
+  <meta name="theme-color" content="#0A0A0C">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="styles/ipod.css">
+  <title>iPod</title>
+</head>
+<body>
+  <div id="device">
+    <div id="screen-frame">
+      <div id="screen" class="screen"></div>
+    </div>
+    <div id="wheel" aria-label="点按轮盘">
+      <div class="wheel-label label-menu">MENU</div>
+      <div class="wheel-label label-prev">⏮</div>
+      <div class="wheel-label label-next">⏭</div>
+      <div class="wheel-label label-play">⏯</div>
+      <div id="wheel-center"></div>
+    </div>
+    <button id="import-btn" aria-label="导入歌曲">＋</button>
+    <input id="file-input" type="file" accept="audio/*" multiple hidden>
+    <div id="install-hint" hidden>点击分享 → 添加到主屏幕,获得全屏 iPod 体验</div>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
