@@ -4,7 +4,7 @@ export function createPlayer() {
   const audio = new Audio();
   audio.preload = 'auto';
 
-  let ctx, gain, sourceConnected = false;
+  let ctx, gain;
   let volume = 0.8;
 
   function ensureAudioGraph() {
@@ -14,10 +14,9 @@ export function createPlayer() {
     gain.gain.value = volume;
     const src = ctx.createMediaElementSource(audio);
     src.connect(gain).connect(ctx.destination);
-    sourceConnected = true;
   }
 
-  const listeners = { statechange: [], ended: [] };
+  const listeners = { statechange: [], ended: [], error: [] };
   let needBlobCb = null;
   let queue = [];
   let index = -1;
@@ -41,6 +40,7 @@ export function createPlayer() {
   audio.addEventListener('pause', emit);
   audio.addEventListener('loadedmetadata', emit);
   audio.addEventListener('ended', () => listeners.ended.forEach(cb => cb(index)));
+  audio.addEventListener('error', () => listeners.error.forEach(cb => cb(index)));
 
   function playBlob(i, blob) {
     index = i;
@@ -48,7 +48,7 @@ export function createPlayer() {
     audio.src = URL.createObjectURL(blob);
     ensureAudioGraph();
     if (ctx.state === 'suspended') ctx.resume();
-    audio.play().catch(() => {/* 解码失败由 app 兜底跳下一首 */});
+    audio.play().catch(() => listeners.error.forEach(cb => cb(index)));
     setMediaSession();
     emit();
   }
@@ -96,9 +96,14 @@ export function createPlayer() {
       if (gain) gain.gain.value = volume;
       emit();
     },
+    unlock() {
+      ensureAudioGraph();
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+    },
     currentIndex() { return index; },
     on(event, cb) { if (listeners[event]) listeners[event].push(cb); },
     onEnded(cb) { listeners.ended.push(cb); },
+    onError(cb) { listeners.error.push(cb); },
     needBlob(cb) { needBlobCb = cb; },
   };
   return api;

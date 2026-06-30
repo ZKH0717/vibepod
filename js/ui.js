@@ -71,5 +71,26 @@ export function createUI(screenEl) {
       else if (view.screen === 'list') renderList(view.listIndex, view.songs);
       else renderNow(view.now);
     },
+    // Fix #5: light update for now-playing screen — avoids full innerHTML rebuild on every timeupdate
+    updateNowProgress(now) {
+      const fill = screenEl.querySelector('.fill');
+      const times = screenEl.querySelector('.times');
+      const modeEl = screenEl.querySelector('.np-mode');
+      if (!fill || !times || !modeEl) { return; }
+      const pct = now.duration ? (now.currentTime / now.duration) * 100 : 0;
+      const volPct = Math.round((now.volume || 0) * 100);
+      const modeIcon = now.npMode === 'volume' ? '🔊' : '⏩';
+      modeEl.textContent = modeIcon;
+      if (now.npMode === 'volume') {
+        fill.style.width = volPct + '%';
+        times.innerHTML = `<span>音量</span><span>${volPct}%</span>`;
+      } else {
+        fill.style.width = pct + '%';
+        times.innerHTML = `<span>${fmtTime(now.currentTime)}</span><span>${fmtTime(now.duration)}</span>`;
+      }
+      // update play/pause indicator
+      const stateEl = screenEl.querySelector('.np-state');
+      if (stateEl) stateEl.textContent = now.playing ? '▶' : '❚❚';
+    },
   };
 }

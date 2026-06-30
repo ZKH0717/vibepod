@@ -17,6 +17,10 @@ let state = initialState();
 let songs = [];
 let now = { title: '', artist: '', playing: false, currentTime: 0, duration: 0, volume: 0.8, npMode: 'volume' };
 
+// Track last-rendered now screen title to decide between full and light re-render
+let lastRenderedScreen = '';
+let lastRenderedTitle = '';
+
 function viewModel() {
   return {
     screen: state.screen,
@@ -26,14 +30,36 @@ function viewModel() {
     now: { ...now, npMode: state.npMode },
   };
 }
-function rerender() { ui.render(viewModel()); }
+function rerender() {
+  const vm = viewModel();
+  if (vm.screen === 'now' && lastRenderedScreen === 'now' && vm.now.title === lastRenderedTitle) {
+    ui.updateNowProgress(vm.now);
+  } else {
+    ui.render(vm);
+    lastRenderedScreen = vm.screen;
+    lastRenderedTitle = vm.now.title;
+  }
+}
 
 player.on('statechange', (p) => {
   now = { ...now, ...p };
   if (state.screen === 'now') rerender();
 });
-player.onEnded(() => { /* MVP:播完即停,不自动下一首 */ });
+player.onEnded(() => { /* 播完即停,不自动下一首 */ });
 player.needBlob(async (i) => songs[i] ? await store.getSongBlob(songs[i].id) : null);
+
+// Fix #2: auto-skip on playback error with transient DOM notice
+player.onError((failedIndex) => {
+  if (songs.length === 0) return;
+  // Show a brief non-blocking notice
+  const notice = document.createElement('div');
+  notice.className = 'error-notice';
+  notice.textContent = '播放失败,跳过';
+  document.body.appendChild(notice);
+  setTimeout(() => notice.remove(), 3000);
+  // Advance once; player.next() no-ops at end of queue, so naturally bounded
+  player.next();
+});
 
 async function runEffects(effects) {
   for (const e of effects) {
@@ -50,6 +76,8 @@ async function runEffects(effects) {
 }
 
 function handleCommand(cmd) {
+  // Fix #1: unlock AudioContext synchronously inside gesture call stack
+  player.unlock();
   const ctx = { songCount: songs.length, hasCurrent: player.currentIndex() >= 0 };
   const { state: ns, effects } = reduce(state, cmd, ctx);
   state = ns;
@@ -60,8 +88,8 @@ function handleCommand(cmd) {
 attachWheel(wheelEl, handleCommand);
 
 // 导入
-async function importFiles(fileList) {
-  for (const f of fileList) {
+async function importFiles(files) {
+  for (const f of files) {
     try { await store.addSong(f); }
     catch (err) { alert('导入失败,可能存储空间不够:' + err.message); }
   }
@@ -69,7 +97,12 @@ async function importFiles(fileList) {
   rerender();
 }
 importBtn?.addEventListener('click', () => fileInput.click());
-fileInput?.addEventListener('change', () => { importFiles(fileInput.files); fileInput.value = ''; });
+// Fix #4: snapshot FileList before clearing value
+fileInput?.addEventListener('change', () => {
+  const files = Array.from(fileInput.files);
+  fileInput.value = '';
+  importFiles(files);
+});
 // 空态里的"点这里导入"按钮(动态生成,事件委托)
 screenEl.addEventListener('click', (e) => {
   if (e.target.id === 'import-empty') fileInput.click();
