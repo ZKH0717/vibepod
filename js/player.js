@@ -9,11 +9,16 @@ export function createPlayer() {
 
   function ensureAudioGraph() {
     if (ctx) return;
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    gain = ctx.createGain();
-    gain.gain.value = volume;
-    const src = ctx.createMediaElementSource(audio);
-    src.connect(gain).connect(ctx.destination);
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      gain = ctx.createGain();
+      gain.gain.value = volume;
+      const src = ctx.createMediaElementSource(audio);
+      src.connect(gain).connect(ctx.destination);
+    } catch (e) {
+      // AudioContext unavailable or blocked — swallow so UI navigation keeps working
+      console.warn('AudioContext unavailable:', e);
+    }
   }
 
   const listeners = { statechange: [], ended: [], error: [] };
@@ -47,7 +52,7 @@ export function createPlayer() {
     if (audio.src) URL.revokeObjectURL(audio.src);
     audio.src = URL.createObjectURL(blob);
     ensureAudioGraph();
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx && ctx.state === 'suspended') ctx.resume();
     audio.play().catch(() => listeners.error.forEach(cb => cb(index)));
     setMediaSession();
     emit();

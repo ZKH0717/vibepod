@@ -49,16 +49,23 @@ player.onEnded(() => { /* 播完即停,不自动下一首 */ });
 player.needBlob(async (i) => songs[i] ? await store.getSongBlob(songs[i].id) : null);
 
 // Fix #2: auto-skip on playback error with transient DOM notice
+// Guard: coalesce duplicate error events for the same index (media 'error' + play() rejection)
+const skipInFlight = new Set();
 player.onError((failedIndex) => {
   if (songs.length === 0) return;
+  // Ignore if this index is already being skipped, or if it's no longer the current track
+  if (skipInFlight.has(failedIndex) || failedIndex !== player.currentIndex()) return;
+  skipInFlight.add(failedIndex);
   // Show a brief non-blocking notice
   const notice = document.createElement('div');
   notice.className = 'error-notice';
   notice.textContent = '播放失败,跳过';
   document.body.appendChild(notice);
   setTimeout(() => notice.remove(), 3000);
-  // Advance once; player.next() no-ops at end of queue, so naturally bounded
+  // Advance exactly once; player.next() no-ops at end of queue, so naturally bounded
   player.next();
+  // Clear flag after a tick so future errors on a different index are handled
+  setTimeout(() => skipInFlight.delete(failedIndex), 500);
 });
 
 async function runEffects(effects) {
